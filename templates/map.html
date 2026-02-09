@@ -3,223 +3,388 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Flight Operations Map</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Flight Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Leaflet CSS -->
+    <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
         html,
         body {
             margin: 0;
-            padding: 0;
             height: 100%;
-            background: #0b0f14;
-            color: #e5e7eb;
+            background: #05080d;
             font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: #e5e7eb;
         }
         
         #topbar {
             height: 56px;
-            background: linear-gradient(90deg, #0b0f14, #0f172a);
+            background: linear-gradient(90deg, #020617, #0f172a);
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 0 16px;
             border-bottom: 1px solid #1f2933;
+        }
+        
+        #topbar h1 {
+            font-size: 16px;
+            color: #38bdf8;
+        }
+        
+        #controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        #controls button,
+        #controls input {
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid #38bdf8;
+            background: #020617;
+            color: #38bdf8;
             font-weight: 600;
-            letter-spacing: 0.5px;
+            cursor: pointer;
+        }
+        
+        #container {
+            display: flex;
+            height: calc(100% - 56px);
+        }
+        
+        #sidebar {
+            width: 260px;
+            background: #020617;
+            border-right: 1px solid #1f2933;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #sidebar input {
+            margin: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #1f2933;
+            background: #020617;
+            color: #e5e7eb;
+        }
+        
+        #flightList {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .flightItem {
+            padding: 10px;
+            border-bottom: 1px solid #1f2933;
+            cursor: pointer;
+        }
+        
+        .flightItem:hover {
+            background: #0f172a;
+        }
+        
+        .flightItem.active {
+            background: #0b2540;
             color: #38bdf8;
         }
         
         #map {
-            height: calc(100% - 56px);
-            width: 100%;
+            flex: 1;
         }
         
-        .info-panel {
-            position: absolute;
-            top: 70px;
-            right: 16px;
-            width: 280px;
-            background: rgba(10, 15, 25, 0.9);
-            border: 1px solid #1f2933;
-            border-radius: 10px;
-            padding: 12px;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
-            z-index: 1000;
+        #infoPanel {
+            width: 300px;
+            background: #020617;
+            border-left: 1px solid #1f2933;
+            padding: 16px;
+            box-sizing: border-box;
         }
         
-        .info-panel h3 {
-            margin: 0 0 10px 0;
+        #infoPanel h2 {
             font-size: 14px;
             color: #38bdf8;
-            border-bottom: 1px solid #1f2933;
-            padding-bottom: 6px;
-        }
-        
-        .flight-item {
-            font-size: 13px;
             margin-bottom: 12px;
-            color: #cbd5e1;
         }
         
-        .flight-item span {
-            color: #38bdf8;
-            font-weight: 600;
+        .leaflet-tile {
+            filter: brightness(0.6) contrast(1.2) saturate(0.8);
         }
         
         .plane-icon {
-            font-size: 22px;
-            filter: drop-shadow(0 0 6px #38bdf8);
-            transform-origin: center;
+            font-size: 18px;
+            transform-origin: center center;
+            filter: drop-shadow(0 0 6px #facc15);
+        }
+        
+        .plane-selected {
+            filter: drop-shadow(0 0 12px #38bdf8);
+        }
+        
+        .airport-circle {
+            stroke: #38bdf8;
+            fill: #38bdf8;
+            fill-opacity: 0.15;
         }
     </style>
 </head>
 
 <body>
-    <div id="topbar">✈️ Flight Operations Map | India Airspace</div>
 
-    <div id="map"></div>
-
-    <div class="info-panel">
-        <h3>Active Flights</h3>
-        <div id="flightList">Loading...</div>
+    <div id="topbar">
+        <h1>✈️ Live Flight Map</h1>
+        <div id="controls">
+            <button id="toggleAnim">⏸ Pause</button>
+            <label>Speed</label>
+            <input type="range" id="speedSlider" min="0.25" max="4" step="0.25" value="1">
+            <button onclick="window.location.href='/dashboard'">Back</button>
+        </div>
     </div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <div id="container">
+        <div id="sidebar">
+            <input type="text" id="searchBox" placeholder="Search flight...">
+            <div id="flightList"></div>
+        </div>
+
+        <div id="map"></div>
+
+        <div id="infoPanel">
+            <h2>Flight Details</h2>
+            <div id="infoContent">Click a plane or a flight from the list.</div>
+            <hr>
+            <div id="stats"></div>
+        </div>
+    </div>
 
     <script>
-        const map = L.map("map").setView([22.5, 80], 5);
+        const map = L.map("map", {
+            zoomControl: true,
+            attributionControl: false
+        }).setView([22.5, 80.0], 5);
 
-        // Dark tile layer
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-            attribution: "&copy; OpenStreetMap & CARTO",
-            subdomains: "abcd",
+        L.tileLayer("https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png", {
             maxZoom: 19
         }).addTo(map);
 
-        // City coordinates
         const cityCoords = {
-            "Chennai": [13.0827, 80.2707],
-            "Durgapur": [23.5204, 87.3119],
-            "Kolkata": [22.5726, 88.3639],
             "Delhi": [28.6139, 77.2090],
             "Mumbai": [19.0760, 72.8777],
+            "Chennai": [13.0827, 80.2707],
             "Bangalore": [12.9716, 77.5946],
-            "Hyderabad": [17.3850, 78.4867]
+            "Hyderabad": [17.3850, 78.4867],
+            "Kolkata": [22.5726, 88.3639],
+            "Durgapur": [23.5204, 87.3119],
+            "Pune": [18.5204, 73.8567],
+            "Ahmedabad": [23.0225, 72.5714],
+            "Kochi": [9.9312, 76.2673],
+            "Trivandrum": [8.5241, 76.9366],
+            "Jaipur": [26.9124, 75.7873],
+            "Guwahati": [26.1445, 91.7362]
         };
 
-        let markers = [];
-        let polylines = [];
+        let layers = [];
+        let flightsState = [];
+        let selectedFlightId = null;
+        let isPaused = false;
+        let speedMultiplier = 1;
+
+        const flightListEl = document.getElementById("flightList");
+        const searchBox = document.getElementById("searchBox");
 
         function clearMap() {
-            markers.forEach(m => map.removeLayer(m));
-            polylines.forEach(p => map.removeLayer(p));
-            markers = [];
-            polylines = [];
+            layers.forEach(l => map.removeLayer(l));
+            layers = [];
         }
 
-        function getBearing(start, end) {
-            const lat1 = start[0] * Math.PI / 180;
-            const lat2 = end[0] * Math.PI / 180;
-            const dLon = (end[1] - start[1]) * Math.PI / 180;
-
+        function computeBearing(src, dst) {
+            const lat1 = src[0] * Math.PI / 180;
+            const lat2 = dst[0] * Math.PI / 180;
+            const dLon = (dst[1] - src[1]) * Math.PI / 180;
             const y = Math.sin(dLon) * Math.cos(lat2);
-            const x = Math.cos(lat1) * Math.sin(lat2) -
-                Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
-
+            const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
             const brng = Math.atan2(y, x);
             return (brng * 180 / Math.PI + 360) % 360;
         }
 
-        async function loadFlights() {
-            const res = await fetch("/api/flights");
-            const flights = await res.json();
+        function distanceKm(a, b) {
+            const R = 6371;
+            const dLat = (b[0] - a[0]) * Math.PI / 180;
+            const dLon = (b[1] - a[1]) * Math.PI / 180;
+            const lat1 = a[0] * Math.PI / 180;
+            const lat2 = b[0] * Math.PI / 180;
+            const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+            return 2 * R * Math.asin(Math.sqrt(h));
+        }
 
-            clearMap();
+        function showFlightInfo(f, speed, altitude, progress, etaMin) {
+            document.getElementById("infoContent").innerHTML = `
+        <b>Flight:</b> ${f.flight_no || "N/A"}<br>
+        <b>Route:</b> ${f.source} → ${f.destination}<br>
+        <b>Status:</b> ${f.status || "Cruising"}<br>
+        <b>Speed:</b> ${speed.toFixed(0)} km/h<br>
+        <b>Altitude:</b> ${altitude.toFixed(0)} ft<br>
+        <b>Progress:</b> ${(progress * 100).toFixed(0)}%<br>
+        <b>ETA:</b> ${etaMin.toFixed(0)} min
+    `;
+        }
 
-            const list = document.getElementById("flightList");
-            list.innerHTML = "";
+        function createPlaneMarker(pos, headingDeg, flight) {
+            const icon = L.divIcon({
+                className: "plane-icon",
+                html: "✈️"
+            });
+            const marker = L.marker(pos, {
+                icon
+            }).addTo(map);
 
-            flights.forEach(f => {
-                const src = cityCoords[f.source];
-                const dst = cityCoords[f.destination];
-                if (!src || !dst) return;
+            setTimeout(() => {
+                const el = marker.getElement();
+                if (el) el.style.transform += ` rotate(${headingDeg}deg)`;
+            }, 0);
 
-                // Draw route
-                const line = L.polyline([src, dst], {
-                    color: "#38bdf8",
-                    weight: 2,
-                    dashArray: "6,6",
-                    opacity: 0.8
-                }).addTo(map);
-                polylines.push(line);
+            marker.bindTooltip(`${flight.flight_no} (${flight.source} → ${flight.destination})`);
 
-                // Plane icon
-                const planeIcon = L.divIcon({
-                    className: "plane-icon",
-                    html: "✈️",
-                    iconSize: [24, 24]
+            marker.on("click", () => {
+                selectedFlightId = flight.flight_no;
+                map.setView(pos, 6, {
+                    animate: true
                 });
+                redraw();
+            });
 
-                const marker = L.marker(src, {
-                    icon: planeIcon
-                }).addTo(map);
-                markers.push(marker);
+            layers.push(marker);
+            return marker;
+        }
 
-                // Rotate plane
-                const angle = getBearing(src, dst);
-                setTimeout(() => {
-                    if (marker.getElement()) {
-                        marker.getElement().style.transform = `rotate(${angle}deg)`;
-                    }
-                }, 50);
+        function animatePlane(marker, src, dst, baseDurationMs, flight) {
+            let start = performance.now();
+            const cruiseSpeed = 700 + Math.random() * 100;
+            const cruiseAltitude = 30000 + Math.random() * 5000;
 
-                animateMarker(marker, src, dst);
+            function step(now) {
+                if (isPaused) {
+                    start += 16;
+                    requestAnimationFrame(step);
+                    return;
+                }
 
-                // HUD item
+                const durationMs = baseDurationMs / speedMultiplier;
+                const t = Math.min((now - start) / durationMs, 1);
+
+                const lat = src[0] + (dst[0] - src[0]) * t;
+                const lng = src[1] + (dst[1] - src[1]) * t;
+
+                marker.setLatLng([lat, lng]);
+
+                const remainingMs = durationMs * (1 - t);
+                const etaMin = remainingMs / 60000;
+
+                if (selectedFlightId === flight.flight_no) {
+                    showFlightInfo(flight, cruiseSpeed, cruiseAltitude, t, etaMin);
+                    const el = marker.getElement();
+                    if (el) el.classList.add("plane-selected");
+                }
+
+                if (t < 1) requestAnimationFrame(step);
+            }
+
+            requestAnimationFrame(step);
+        }
+
+        function buildFlightList() {
+            flightListEl.innerHTML = "";
+            const query = searchBox.value.toLowerCase();
+
+            flightsState.forEach(f => {
+                if (query && !(f.flight_no || "").toLowerCase().includes(query)) return;
+
                 const div = document.createElement("div");
-                div.className = "flight-item";
-
-                const fuelPct = Math.min(100, Math.max(0, f.fuel || 0));
-                const statusColor = f.status === "Delayed" ? "#f87171" :
-                    f.status === "Boarding" ? "#facc15" :
-                    "#34d399";
-
-                div.innerHTML = `
-          <div><span>${f.flight_no}</span> ${f.source} → ${f.destination}</div>
-          <div style="font-size:12px;color:${statusColor}">Status: ${f.status}</div>
-          <div style="background:#1f2933;border-radius:6px;overflow:hidden;margin-top:4px;">
-            <div style="height:6px;width:${fuelPct}%;background:#38bdf8;"></div>
-          </div>
-        `;
-
-                list.appendChild(div);
+                div.className = "flightItem" + (selectedFlightId === f.flight_no ? " active" : "");
+                div.textContent = `${f.flight_no || "N/A"}: ${f.source} → ${f.destination}`;
+                div.onclick = () => {
+                    selectedFlightId = f.flight_no;
+                    redraw();
+                };
+                flightListEl.appendChild(div);
             });
         }
 
-        function animateMarker(marker, start, end) {
-            let t = 0;
+        function redraw() {
+            clearMap();
+            buildFlightList();
 
-            function step() {
-                t += 0.0015;
-                if (t > 1) t = 0;
+            let totalDist = 0;
 
-                const lat = start[0] + (end[0] - start[0]) * t;
-                const lng = start[1] + (end[1] - start[1]) * t;
+            flightsState.forEach(f => {
+                const src = cityCoords[(f.source || "").trim()];
+                const dst = cityCoords[(f.destination || "").trim()];
+                if (!src || !dst) return;
 
-                marker.setLatLng([lat, lng]);
-                requestAnimationFrame(step);
-            }
+                const isSelected = selectedFlightId === f.flight_no;
 
-            step();
+                const route = L.polyline([src, dst], {
+                    color: isSelected ? "#38bdf8" : "#facc15",
+                    weight: isSelected ? 4 : 2.5,
+                    dashArray: "6 10",
+                    opacity: 0.9
+                }).addTo(map);
+                layers.push(route);
+
+                L.circle(src, {
+                    radius: 40000,
+                    className: "airport-circle",
+                    weight: 1
+                }).addTo(map);
+                L.circle(dst, {
+                    radius: 40000,
+                    className: "airport-circle",
+                    weight: 1
+                }).addTo(map);
+
+                const bearing = computeBearing(src, dst);
+                const plane = createPlaneMarker(src, bearing, f);
+
+                const dist = distanceKm(src, dst);
+                totalDist += dist;
+
+                const hours = dist / 750;
+                const durationMs = Math.max(hours * 60 * 60 * 1000, 10000);
+
+                animatePlane(plane, src, dst, durationMs, f);
+            });
+
+            document.getElementById("stats").innerHTML = `
+        <b>Total Flights:</b> ${flightsState.length}<br>
+        <b>Avg Distance:</b> ${(totalDist / Math.max(1, flightsState.length)).toFixed(0)} km
+    `;
         }
 
+        async function loadFlights() {
+            const res = await fetch("/api/flights");
+            flightsState = await res.json();
+            redraw();
+        }
+
+        document.getElementById("toggleAnim").onclick = () => {
+            isPaused = !isPaused;
+            document.getElementById("toggleAnim").textContent = isPaused ? "▶ Play" : "⏸ Pause";
+        };
+
+        document.getElementById("speedSlider").oninput = (e) => {
+            speedMultiplier = parseFloat(e.target.value);
+        };
+
+        searchBox.oninput = buildFlightList;
+
         loadFlights();
-        setInterval(loadFlights, 5000);
     </script>
+
 </body>
 
 </html>

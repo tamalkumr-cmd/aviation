@@ -1,120 +1,278 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Aviation Dashboard</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <title>Flight Command Center</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
-        body {
-            margin: 0;
-            background: #0b0b10;
-            color: #fff;
-            font-family: system-ui, Segoe UI, Roboto, sans-serif;
+         :root {
+            --bg: #070b12;
+            --panel: #0f172a;
+            --panel-2: #020617;
+            --border: #1f2933;
+            --accent: #38bdf8;
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --glow: rgba(56, 189, 248, 0.35);
         }
         
-        .topbar {
-            height: 60px;
-            background: #111118;
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: radial-gradient(1200px 600px at 10% -10%, #0b1b33, transparent), var(--bg);
+            color: var(--text);
+        }
+        /* Top Bar */
+        
+        header {
+            height: 64px;
+            background: linear-gradient(90deg, #020617, #0f172a);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+            border-bottom: 1px solid var(--border);
         }
+        
+        header h1 {
+            color: var(--accent);
+            font-size: 18px;
+            letter-spacing: 0.5px;
+        }
+        
+        header .actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button,
+        .btn {
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--accent);
+            background: var(--panel-2);
+            color: var(--accent);
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button:hover,
+        .btn:hover {
+            background: var(--accent);
+            color: #020617;
+            box-shadow: 0 0 18px var(--glow);
+        }
+        /* Layout */
         
         .container {
-            padding: 20px;
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
         }
+        /* Hero */
         
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        .hero {
+            background: linear-gradient(135deg, #020617, #0f172a);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            display: flex;
+            flex-wrap: wrap;
             gap: 20px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.08);
         }
         
-        .card {
-            background: #151520;
-            border-radius: 14px;
+        .hero h2 {
+            margin: 0 0 8px 0;
+            color: var(--accent);
+            font-size: 22px;
+        }
+        
+        .hero p {
+            margin: 0;
+            color: var(--muted);
+        }
+        /* Stats */
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+        
+        .stat-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
             padding: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
         }
         
-        .card h3 {
-            margin: 0 0 10px;
-            color: #aaa;
-            font-size: 14px;
+        .stat-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(400px 200px at -20% -20%, rgba(56, 189, 248, 0.12), transparent);
+            pointer-events: none;
         }
         
-        .card p {
+        .stat-card h3 {
+            margin: 0;
+            font-size: 13px;
+            color: var(--muted);
+        }
+        
+        .stat-card .value {
             font-size: 28px;
             font-weight: 700;
-            color: #00e5ff;
-            margin: 0;
+            margin-top: 6px;
+            color: var(--accent);
+        }
+        /* Actions Grid */
+        
+        .actions-grid {
+            margin-top: 28px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
         }
         
-        .btn {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 10px 16px;
-            border-radius: 10px;
-            text-decoration: none;
-            font-weight: 700;
-            background: linear-gradient(135deg, #6aa9ff, #8f7bff);
-            color: #0b0b10;
+        .action-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 22px;
+            transition: 0.25s ease;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(56, 189, 248, 0.15);
+        }
+        
+        .action-card h3 {
+            margin: 0 0 8px 0;
+            color: var(--accent);
+        }
+        
+        .action-card p {
+            margin: 0 0 14px 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+        /* Footer note */
+        
+        .note {
+            margin-top: 30px;
             text-align: center;
-        }
-        
-        .btn.red {
-            background: linear-gradient(135deg, #ff6b6b, #ff3b3b);
-            color: #0b0b10;
+            color: var(--muted);
+            font-size: 13px;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="topbar">
-        <div>✈️ Aviation Management Dashboard</div>
-        <a href="/logout" style="color:#ff6b6b;text-decoration:none;">Logout</a>
-    </div>
+    <header>
+        <h1>✈️ Flight Command Center</h1>
+        <div class="actions">
+            <a class="btn" href="/map">Live Map</a>
+            <button onclick="simulate()">Simulate</button>
+            <a class="btn" href="/logout">Logout</a>
+        </div>
+    </header>
 
     <div class="container">
 
-        <div class="grid">
-            <div class="card">
+        <!-- Hero -->
+        <div class="hero">
+            <div>
+                <h2>Welcome, Captain.</h2>
+                <p>Monitor flights, run simulations, and manage your airspace from one place.</p>
+            </div>
+            <!-- Anchor to management page -->
+            <a class="btn" href="/flights">✏️ Open Flight Manager</a>
+
+
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
                 <h3>Total Flights</h3>
-                <p id="totalFlights">0</p>
+                <div class="value" id="statFlights">—</div>
+            </div>
+            <div class="stat-card">
+                <h3>System Status</h3>
+                <div class="value" id="statStatus">Online</div>
+            </div>
+            <div class="stat-card">
+                <h3>Last Simulation</h3>
+                <div class="value" id="statSim">—</div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions-grid">
+            <div class="action-card">
+                <h3>🌍 Live Flight Map</h3>
+                <p>Track all active flights in real time on an interactive map.</p>
+                <a class="btn" href="/map">Open Map</a>
             </div>
 
-            <div class="card">
-                <h3>Actions</h3>
-                <a class="btn" href="/map">🌍 Open Live Map</a><br><br>
-                <a class="btn" href="/flights">✈️ Manage Flights</a>
+            <div class="action-card">
+                <h3>🛠️ Manage Flights</h3>
+                <p>Add, delete, or edit flights from the management panel.</p>
+                <a class="btn" href="/flights">✏️ Open Flight Manager</a>
             </div>
 
-            <div class="card">
-                <h3>Simulation</h3>
-                <button class="btn red" onclick="runSimulation()">Run Simulation</button>
+            <div class="action-card">
+                <h3>⚡ Run Simulation</h3>
+                <p>Simulate system behavior and update flight states.</p>
+                <button onclick="simulate()">Run Now</button>
             </div>
+        </div>
+
+        <div class="note">
+            This dashboard is your control tower. The manager page is your hangar.
         </div>
 
     </div>
 
     <script>
-        async function loadStats() {
-            const res = await fetch("/api/flights");
-            const flights = await res.json();
-            document.getElementById("totalFlights").textContent = flights.length;
-        }
-
-        async function runSimulation() {
-            await fetch("/api/simulate", {
+        async function simulate() {
+            const res = await fetch("/api/simulate", {
                 method: "POST"
             });
-            alert("Simulation updated!");
-            loadStats();
+            const data = await res.json();
+            alert(data.message || "Simulation triggered");
+            document.getElementById("statSim").textContent = new Date().toLocaleTimeString();
+        }
+
+        // Optional: fetch stats
+        async function loadStats() {
+            try {
+                const res = await fetch("/api/flights");
+                const flights = await res.json();
+                document.getElementById("statFlights").textContent = flights.length;
+            } catch (e) {
+                document.getElementById("statFlights").textContent = "—";
+            }
         }
 
         loadStats();

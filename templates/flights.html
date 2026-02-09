@@ -1,31 +1,338 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Flights</title>
+    <meta charset="UTF-8">
+    <title>Flight Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+         :root {
+            --bg: #070b12;
+            --panel: #0f172a;
+            --panel-2: #020617;
+            --border: #1f2933;
+            --accent: #38bdf8;
+            --accent-2: #facc15;
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --glow: rgba(56, 189, 248, 0.35);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: radial-gradient(1200px 600px at 10% -10%, #0b1b33, transparent), var(--bg);
+            color: var(--text);
+        }
+        /* Top bar */
+        
+        header {
+            height: 64px;
+            background: linear-gradient(90deg, #020617, #0f172a);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        header h1 {
+            color: var(--accent);
+            font-size: 18px;
+            letter-spacing: 0.5px;
+        }
+        
+        header nav {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--accent);
+            background: var(--panel-2);
+            color: var(--accent);
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn:hover {
+            background: var(--accent);
+            color: #020617;
+            box-shadow: 0 0 18px var(--glow);
+        }
+        /* Layout */
+        
+        .container {
+            max-width: 1200px;
+            margin: 28px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 20px;
+        }
+        /* Cards */
+        
+        .card {
+            background: linear-gradient(135deg, #020617, #0f172a);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(500px 250px at -20% -20%, rgba(56, 189, 248, 0.12), transparent);
+            pointer-events: none;
+        }
+        
+        .card h2 {
+            margin: 0 0 14px 0;
+            color: var(--accent);
+            font-size: 18px;
+        }
+        /* Terminal */
+        
+        .terminal {
+            background: #020617;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+        }
+        
+        .terminal-header {
+            background: #020617;
+            border-bottom: 1px solid var(--border);
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .terminal-header .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .dot.red {
+            background: #ef4444;
+        }
+        
+        .dot.yellow {
+            background: #facc15;
+        }
+        
+        .dot.green {
+            background: #22c55e;
+        }
+        
+        .terminal-header .title {
+            margin-left: 8px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        
+        #flightTerminal {
+            width: 100%;
+            min-height: 220px;
+            padding: 14px;
+            background: #020617;
+            color: var(--text);
+            border: none;
+            outline: none;
+            resize: vertical;
+            font-family: "JetBrains Mono", "Fira Code", monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        /* Actions */
+        
+        .form-actions {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .note {
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+        /* Table */
+        
+        .table-wrap {
+            overflow: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+        
+        thead {
+            background: #020617;
+        }
+        
+        th,
+        td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        
+        th {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        
+        tbody tr:hover {
+            background: rgba(56, 189, 248, 0.06);
+        }
+        
+        .badge {
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Flights</h1>
 
-    <nav>
-        <a href="/dashboard">Dashboard</a> |
-        <a href="/logout">Logout</a>
-    </nav>
+    <header>
+        <h1>✈️ Flight Manager</h1>
+        <nav>
+            <a class="btn" href="/dashboard">Dashboard</a>
+            <a class="btn" href="/map">Live Map</a>
+            <a class="btn" href="/logout">Logout</a>
+        </nav>
+    </header>
 
-    <h3>Add Flight</h3>
-    <input id="flight_no" placeholder="Flight No">
-    <input id="source" placeholder="Source">
-    <input id="destination" placeholder="Destination">
-    <input id="status" placeholder="Status">
-    <input id="fuel" type="number" placeholder="Fuel">
-    <button onclick="addFlight()">Add</button>
+    <div class="container">
 
-    <h3>All Flights</h3>
-    <button onclick="simulate()">Simulate</button>
-    <ul id="flightList"></ul>
+        <!-- Left: Terminal Insert -->
+        <div class="card">
+            <h2>🖥️ Flight Insert Terminal</h2>
+
+            <div style="margin-bottom:10px; color:#94a3b8; font-size:13px;">
+                Paste flight data as JSON:
+            </div>
+
+            <div class="terminal">
+                <div class="terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="title">flight_insert.json</span>
+                </div>
+
+                <textarea id="flightTerminal">{
+  "flight_no": "6E981",
+  "source": "Chennai",
+  "destination": "Durgapur",
+  "status": "On Time",
+  "fuel": 85
+}</textarea>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn" onclick="addFlightFromTerminal()">▶ Run Insert</button>
+                <button class="btn" onclick="simulate()">Simulate</button>
+            </div>
+
+            <div class="note" id="terminalMsg">
+                Write valid JSON and click “Run Insert”.
+            </div>
+        </div>
+
+        <!-- Right: Flights Table -->
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h2>📋 All Flights</h2>
+                <span class="badge" id="flightCount">0 flights</span>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Flight No</th>
+                            <th>Route</th>
+                            <th>Status</th>
+                            <th>Fuel</th>
+                        </tr>
+                    </thead>
+                    <tbody id="flightList">
+                        <!-- flights.js will populate this -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
 
     <script src="/static/js/flights.js"></script>
+
+    <script>
+        async function addFlightFromTerminal() {
+            const text = document.getElementById("flightTerminal").value;
+            const msg = document.getElementById("terminalMsg");
+
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                msg.style.color = "#f87171";
+                msg.textContent = "❌ Invalid JSON. Fix syntax and try again.";
+                return;
+            }
+
+            const res = await fetch("/api/flights", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await res.json();
+
+            if (res.ok) {
+                msg.style.color = "#34d399";
+                msg.textContent = "✅ " + (result.message || "Flight added");
+                if (typeof loadFlights === "function") loadFlights(); // refresh table if flights.js has it
+            } else {
+                msg.style.color = "#f87171";
+                msg.textContent = "❌ " + (result.error || "Failed to add flight");
+            }
+        }
+    </script>
+
 </body>
 
 </html>
