@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Flights</title>
+</head>
+
+<body>
+    <h1>Flights</h1>
+
+    <nav>
+        <a href="/dashboard">Dashboard</a> |
+        <a href="/logout">Logout</a>
+    </nav>
+
+    <h3>Add Flight</h3>
+    <input id="flight_no" placeholder="Flight No">
+    <input id="source" placeholder="Source">
+    <input id="destination" placeholder="Destination">
+    <input id="status" placeholder="Status">
+    <input id="fuel" type="number" placeholder="Fuel">
+    <button onclick="addFlight()">Add</button>
+
+    <h3>All Flights</h3>
+    <button onclick="simulate()">Simulate</button>
+    <ul id="flightList"></ul>
+
+    <script src="/static/js/flights.js"></script>
+</body>
+
+</html>
