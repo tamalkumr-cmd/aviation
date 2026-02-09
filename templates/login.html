@@ -1,19 +1,298 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Login</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aviation Control — Login</title>
+
+    <style>
+         :root {
+            --bg: #0a0a0f;
+            --card: rgba(20, 20, 30, 0.75);
+            --glass: rgba(255, 255, 255, 0.08);
+            --text: #eaeaf0;
+            --muted: #9aa0b4;
+            --grad1: #8aa2ff;
+            --grad2: #ff9acb;
+            --accent: #6cf2c2;
+            --error: #ff5c5c;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+        
+        body {
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: radial-gradient(1200px 600px at 10% -10%, #1a1f3a 0%, transparent 60%), radial-gradient(1000px 500px at 110% 10%, #3a1a2f 0%, transparent 60%), linear-gradient(180deg, #050508, #0a0a0f);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        /* floating pills in background */
+        
+        .pill {
+            position: absolute;
+            border-radius: 999px;
+            filter: blur(1px);
+            opacity: 0.35;
+        }
+        
+        .pill.one {
+            width: 420px;
+            height: 90px;
+            background: linear-gradient(90deg, #6a7cff, #ff8fb8);
+            top: 10%;
+            left: -10%;
+            transform: rotate(-12deg);
+        }
+        
+        .pill.two {
+            width: 300px;
+            height: 70px;
+            background: linear-gradient(90deg, #2bd9a8, #6a7cff);
+            bottom: 15%;
+            right: -5%;
+            transform: rotate(18deg);
+        }
+        
+        .pill.three {
+            width: 260px;
+            height: 60px;
+            background: linear-gradient(90deg, #ff8fb8, #2bd9a8);
+            top: 65%;
+            left: 10%;
+            transform: rotate(-8deg);
+        }
+        /* main container */
+        
+        .wrapper {
+            width: 100%;
+            max-width: 420px;
+            padding: 24px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            padding: 36px 32px 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        }
+        /* header */
+        
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 18px;
+        }
+        
+        .brand .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff5c7a;
+            box-shadow: 0 0 10px #ff5c7a;
+        }
+        
+        h1 {
+            font-size: 36px;
+            line-height: 1.1;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+        
+        h1 span {
+            background: linear-gradient(90deg, var(--grad1), var(--grad2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+        /* form */
+        
+        .form-group {
+            margin-bottom: 18px;
+        }
+        
+        label {
+            display: block;
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(10, 10, 20, 0.6);
+            color: var(--text);
+            font-size: 15px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(108, 242, 194, 0.2);
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 8px;
+            color: #0a0a0f;
+            background: linear-gradient(90deg, var(--grad1), var(--grad2));
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 30px rgba(138, 162, 255, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        /* toast */
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all .3s ease;
+            z-index: 999;
+        }
+        
+        .toast.ok {
+            background: linear-gradient(90deg, #2bd9a8, #6cf2c2);
+            color: #052016;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .toast.error {
+            background: linear-gradient(90deg, #ff5c5c, #ff8a8a);
+            color: #2a0505;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* footer hint */
+        
+        .footer-hint {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+    </style>
 </head>
 
 <body>
-    <h2>Login</h2>
-    <input id="email" placeholder="Email">
-    <input id="password" type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
 
-    <p>New user? <a href="/register">Register</a></p>
+    <div class="pill one"></div>
+    <div class="pill two"></div>
+    <div class="pill three"></div>
 
-    <script src="/static/js/auth.js"></script>
+    <div class="wrapper">
+        <div class="card">
+            <div class="brand">
+                <span class="dot"></span> Aviation Control System
+            </div>
+
+            <h1>Access <span>Control</span></h1>
+            <p class="subtitle">Secure sign-in to manage flights, aircraft, and operations.</p>
+
+            <form onsubmit="event.preventDefault(); login();">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="pilot@control.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit">Sign In</button>
+            </form>
+
+            <div class="footer-hint">
+                Authorized personnel only.
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        function showToast(msg, ok = false) {
+            const t = document.getElementById("toast");
+            if (!t) return alert(msg);
+            t.textContent = msg;
+            t.className = "toast " + (ok ? "ok" : "error");
+            setTimeout(() => {
+                t.className = "toast";
+            }, 3000);
+        }
+
+        async function login() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            const res = await fetch("/api/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email,
+                    password
+                })
+            });
+
+            const data = await res.json();
+            showToast(data.message || data.error || "Unknown response", res.ok);
+
+            if (res.ok) {
+                setTimeout(() => window.location.href = "/dashboard", 600);
+            }
+        }
+    </script>
+
 </body>
 
 </html>

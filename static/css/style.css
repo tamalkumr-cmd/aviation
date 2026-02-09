@@ -1,10 +1,231 @@
-body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
+:root {
+    --bg: #0b0d10;
+    --panel: #11141a;
+    --panel-2: #0f1217;
+    --text: #e6e8eb;
+    --muted: #9aa0a6;
+    --accent: #7cf2c2;
+    /* mint-neon */
+    --accent-2: #6aa8ff;
+    /* blue neon */
+    --danger: #ff6b6b;
+    --radius: 14px;
+    --glow: 0 0 24px rgba(124, 242, 194, 0.25);
+    --shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    --border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-input,
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    color: var(--text);
+    background: radial-gradient(1200px 600px at 20% -10%, rgba(106, 168, 255, 0.08), transparent 40%), radial-gradient(900px 500px at 80% 110%, rgba(124, 242, 194, 0.10), transparent 45%), var(--bg);
+}
+
+.app {
+    min-height: 100%;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.card {
+    width: 100%;
+    max-width: 420px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)), var(--panel);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: var(--border);
+    padding: 28px 26px 26px;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(120deg, transparent 20%, rgba(124, 242, 194, 0.25), transparent 60%);
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: var(--glow);
+}
+
+h1 {
+    font-size: 1.4rem;
+    margin: 0;
+    letter-spacing: 0.4px;
+}
+
+.subtitle {
+    color: var(--muted);
+    margin: 6px 0 18px;
+    font-size: 0.9rem;
+}
+
+.field {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+label {
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--panel-2);
+    border: var(--border);
+    color: var(--text);
+    outline: none;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+input::placeholder {
+    color: #6f7680;
+}
+
+input:focus {
+    border-color: rgba(124, 242, 194, 0.6);
+    box-shadow: 0 0 0 3px rgba(124, 242, 194, 0.15);
+}
+
+.actions {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+}
+
 button {
-    margin: 5px;
-    padding: 5px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    color: #0b0d10;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow: var(--glow);
+    transition: transform 0.08s ease, filter 0.2s ease;
+}
+
+button:hover {
+    filter: brightness(1.05);
+}
+
+button:active {
+    transform: translateY(1px) scale(0.995);
+}
+
+.link {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.link a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.link a:hover {
+    text-decoration: underline;
+}
+
+.toast {
+    margin-top: 10px;
+    min-height: 18px;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.toast.error {
+    color: var(--danger);
+}
+
+.toast.ok {
+    color: var(--accent);
+}
+
+
+/* Dashboard */
+
+.dash {
+    width: 100%;
+    max-width: 720px;
+    background: var(--panel);
+    border-radius: var(--radius);
+    border: var(--border);
+    box-shadow: var(--shadow);
+    padding: 24px;
+}
+
+.dash h2 {
+    margin: 0 0 10px;
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.hr {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.06);
+    margin: 14px 0;
+}
+
+#map::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: conic-gradient(from 0deg, transparent, rgba(56, 189, 248, 0.08), transparent);
+    animation: sweep 6s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes sweep {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.plane-icon {
+    font-size: 22px;
+    filter: drop-shadow(0 0 6px #38bdf8);
+    transform-origin: center;
 }

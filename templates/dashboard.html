@@ -2,18 +2,124 @@
 <html>
 
 <head>
-    <title>Dashboard</title>
+    <title>Aviation Dashboard</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <style>
+        body {
+            margin: 0;
+            background: #0b0b10;
+            color: #fff;
+            font-family: system-ui, Segoe UI, Roboto, sans-serif;
+        }
+        
+        .topbar {
+            height: 60px;
+            background: #111118;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+        }
+        
+        .container {
+            padding: 20px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        
+        .card {
+            background: #151520;
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+        }
+        
+        .card h3 {
+            margin: 0 0 10px;
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        .card p {
+            font-size: 28px;
+            font-weight: 700;
+            color: #00e5ff;
+            margin: 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 16px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6aa9ff, #8f7bff);
+            color: #0b0b10;
+            text-align: center;
+        }
+        
+        .btn.red {
+            background: linear-gradient(135deg, #ff6b6b, #ff3b3b);
+            color: #0b0b10;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Aviation Management Dashboard</h1>
 
-    <nav>
-        <a href="/flights">Flights</a> |
-        <a href="/logout">Logout</a>
-    </nav>
+    <div class="topbar">
+        <div>✈️ Aviation Management Dashboard</div>
+        <a href="/logout" style="color:#ff6b6b;text-decoration:none;">Logout</a>
+    </div>
 
-    <p>Welcome to the control center.</p>
+    <div class="container">
+
+        <div class="grid">
+            <div class="card">
+                <h3>Total Flights</h3>
+                <p id="totalFlights">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Actions</h3>
+                <a class="btn" href="/map">🌍 Open Live Map</a><br><br>
+                <a class="btn" href="/flights">✈️ Manage Flights</a>
+            </div>
+
+            <div class="card">
+                <h3>Simulation</h3>
+                <button class="btn red" onclick="runSimulation()">Run Simulation</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        async function loadStats() {
+            const res = await fetch("/api/flights");
+            const flights = await res.json();
+            document.getElementById("totalFlights").textContent = flights.length;
+        }
+
+        async function runSimulation() {
+            await fetch("/api/simulate", {
+                method: "POST"
+            });
+            alert("Simulation updated!");
+            loadStats();
+        }
+
+        loadStats();
+    </script>
+
 </body>
 
 </html>
