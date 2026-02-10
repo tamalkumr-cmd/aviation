@@ -14,6 +14,9 @@
             --border: #1f2933;
             --accent: #38bdf8;
             --accent-2: #facc15;
+            --good: #22c55e;
+            --warn: #facc15;
+            --bad: #ef4444;
             --text: #e5e7eb;
             --muted: #94a3b8;
             --glow: rgba(56, 189, 248, 0.35);
@@ -72,6 +75,17 @@
             color: #020617;
             box-shadow: 0 0 18px var(--glow);
         }
+        
+        .btn.secondary {
+            border-color: var(--accent-2);
+            color: var(--accent-2);
+        }
+        
+        .btn.secondary:hover {
+            background: var(--accent-2);
+            color: #020617;
+            box-shadow: 0 0 18px rgba(250, 204, 21, 0.35);
+        }
         /* Layout */
         
         .container {
@@ -79,7 +93,7 @@
             margin: 28px auto;
             padding: 0 20px;
             display: grid;
-            grid-template-columns: 380px 1fr;
+            grid-template-columns: 420px 1fr;
             gap: 20px;
         }
         /* Cards */
@@ -107,64 +121,87 @@
             color: var(--accent);
             font-size: 18px;
         }
-        /* Terminal */
+        /* Scheduler UI */
         
-        .terminal {
+        .scheduler-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .scheduler-grid input,
+        .scheduler-grid select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--panel-2);
+            color: var(--text);
+            outline: none;
+        }
+        
+        .scheduler-grid input:focus,
+        .scheduler-grid select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+        
+        .row-span-2 {
+            grid-column: span 2;
+        }
+        
+        .slider-wrap {
+            grid-column: span 2;
             background: #020617;
             border: 1px solid var(--border);
             border-radius: 14px;
-            overflow: hidden;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.6);
+            padding: 12px;
         }
         
-        .terminal-header {
-            background: #020617;
-            border-bottom: 1px solid var(--border);
-            padding: 8px 12px;
+        .slider-wrap label {
             display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .terminal-header .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        
-        .dot.red {
-            background: #ef4444;
-        }
-        
-        .dot.yellow {
-            background: #facc15;
-        }
-        
-        .dot.green {
-            background: #22c55e;
-        }
-        
-        .terminal-header .title {
-            margin-left: 8px;
+            justify-content: space-between;
+            font-size: 12px;
             color: var(--muted);
+            margin-bottom: 6px;
+        }
+        
+        .slider-wrap input[type="range"] {
+            width: 100%;
+        }
+        
+        .pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .pill {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: #020617;
+            color: var(--muted);
+            cursor: pointer;
             font-size: 12px;
         }
         
-        #flightTerminal {
-            width: 100%;
-            min-height: 220px;
-            padding: 14px;
-            background: #020617;
-            color: var(--text);
-            border: none;
-            outline: none;
-            resize: vertical;
-            font-family: "JetBrains Mono", "Fira Code", monospace;
-            font-size: 13px;
-            line-height: 1.6;
+        .pill.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
         }
-        /* Actions */
+        
+        .preview {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px dashed var(--border);
+            background: #020617;
+            font-family: "JetBrains Mono", "Fira Code", monospace;
+            font-size: 12px;
+            color: #a5f3fc;
+        }
         
         .form-actions {
             margin-top: 14px;
@@ -235,38 +272,56 @@
 
     <div class="container">
 
-        <!-- Left: Terminal Insert -->
+        <!-- Left: Futuristic Scheduler -->
         <div class="card">
-            <h2>🖥️ Flight Insert Terminal</h2>
+            <h2>🧭 Flight Scheduler</h2>
 
-            <div style="margin-bottom:10px; color:#94a3b8; font-size:13px;">
-                Paste flight data as JSON:
-            </div>
+            <div class="scheduler-grid">
+                <input id="flight_no" placeholder="Flight No (e.g. 6E981)">
+                <select id="status">
+        <option value="Scheduled">Scheduled</option>
+        <option value="Boarding">Boarding</option>
+        <option value="On Time">On Time</option>
+        <option value="Delayed">Delayed</option>
+        <option value="Departed">Departed</option>
+      </select>
 
-            <div class="terminal">
-                <div class="terminal-header">
-                    <span class="dot red"></span>
-                    <span class="dot yellow"></span>
-                    <span class="dot green"></span>
-                    <span class="title">flight_insert.json</span>
+                <input id="source" placeholder="Source (e.g. Chennai)">
+                <input id="destination" placeholder="Destination (e.g. Durgapur)">
+
+                <input id="date" type="date">
+                <input id="time" type="time">
+
+                <div class="slider-wrap">
+                    <label>
+          <span>Fuel Load</span>
+          <span id="fuelLabel">80%</span>
+        </label>
+                    <input id="fuel" type="range" min="0" max="100" value="80">
                 </div>
 
-                <textarea id="flightTerminal">{
-  "flight_no": "6E981",
-  "source": "Chennai",
-  "destination": "Durgapur",
-  "status": "On Time",
-  "fuel": 85
-}</textarea>
+                <div class="row-span-2">
+                    <div style="font-size:12px;color:#94a3b8;margin-bottom:6px;">Quick Presets</div>
+                    <div class="pills">
+                        <div class="pill" data-fuel="90" data-status="On Time">Long Haul</div>
+                        <div class="pill" data-fuel="70" data-status="On Time">Short Hop</div>
+                        <div class="pill" data-fuel="50" data-status="Boarding">Charter</div>
+                        <div class="pill" data-fuel="100" data-status="Scheduled">VIP</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview" id="preview">
+                // Mission preview will appear here
             </div>
 
             <div class="form-actions">
-                <button class="btn" onclick="addFlightFromTerminal()">▶ Run Insert</button>
-                <button class="btn" onclick="simulate()">Simulate</button>
+                <button class="btn" onclick="scheduleFlight()">🚀 Schedule Flight</button>
+                <button class="btn secondary" onclick="simulate()">⚡ Simulate</button>
             </div>
 
-            <div class="note" id="terminalMsg">
-                Write valid JSON and click “Run Insert”.
+            <div class="note" id="schedMsg">
+                Set route, time, fuel, then launch the schedule.
             </div>
         </div>
 
@@ -285,10 +340,11 @@
                             <th>Route</th>
                             <th>Status</th>
                             <th>Fuel</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="flightList">
-                        <!-- flights.js will populate this -->
+                        <!-- static/js/flights.js will populate -->
                     </tbody>
                 </table>
             </div>
@@ -299,38 +355,111 @@
     <script src="/static/js/flights.js"></script>
 
     <script>
-        async function addFlightFromTerminal() {
-            const text = document.getElementById("flightTerminal").value;
-            const msg = document.getElementById("terminalMsg");
+        const fuelSlider = document.getElementById("fuel");
+        const fuelLabel = document.getElementById("fuelLabel");
+        const preview = document.getElementById("preview");
+        const msg = document.getElementById("schedMsg");
 
-            let data;
+        function updatePreview() {
+            const data = collectData(false);
+            preview.textContent =
+                `{
+  "flight_no": "${data.flight_no}",
+  "source": "${data.source}",
+  "destination": "${data.destination}",
+  "status": "${data.status}",
+  "fuel": ${data.fuel},
+  "scheduled_at": "${data.scheduled_at}"
+}`;
+        }
+
+        fuelSlider.addEventListener("input", () => {
+            fuelLabel.textContent = fuelSlider.value + "%";
+            updatePreview();
+        });
+
+        document.querySelectorAll(".pill").forEach(p => {
+            p.addEventListener("click", () => {
+                document.querySelectorAll(".pill").forEach(x => x.classList.remove("active"));
+                p.classList.add("active");
+                const f = p.getAttribute("data-fuel");
+                const s = p.getAttribute("data-status");
+                fuelSlider.value = f;
+                fuelLabel.textContent = f + "%";
+                document.getElementById("status").value = s;
+                updatePreview();
+            });
+        });
+
+        ["flight_no", "source", "destination", "status", "date", "time"].forEach(id => {
+            document.getElementById(id).addEventListener("input", updatePreview);
+        });
+
+        function collectData(requireAll = true) {
+            const flight_no = document.getElementById("flight_no").value.trim();
+            const source = document.getElementById("source").value.trim();
+            const destination = document.getElementById("destination").value.trim();
+            const status = document.getElementById("status").value;
+            const fuel = parseInt(document.getElementById("fuel").value, 10);
+            const date = document.getElementById("date").value;
+            const time = document.getElementById("time").value;
+
+            if (requireAll && (!flight_no || !source || !destination)) {
+                throw new Error("Flight No, Source, and Destination are required.");
+            }
+
+            const scheduled_at = (date && time) ? `${date}T${time}` : "unspecified";
+
+            return {
+                flight_no,
+                source,
+                destination,
+                status,
+                fuel,
+                scheduled_at
+            };
+        }
+
+        async function scheduleFlight() {
             try {
-                data = JSON.parse(text);
+                const data = collectData(true);
+
+                // Backend expects: flight_no, source, destination, status, fuel
+                const payload = {
+                    flight_no: data.flight_no,
+                    source: data.source,
+                    destination: data.destination,
+                    status: data.status,
+                    fuel: data.fuel
+                };
+
+                const res = await fetch("/api/flights", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await res.json();
+
+                if (res.ok) {
+                    msg.style.color = "#34d399";
+                    msg.textContent = "✅ " + (result.message || "Flight scheduled");
+                    if (typeof loadFlights === "function") loadFlights();
+                } else {
+                    msg.style.color = "#f87171";
+                    msg.textContent = "❌ " + (result.error || "Failed to schedule flight");
+                }
             } catch (e) {
                 msg.style.color = "#f87171";
-                msg.textContent = "❌ Invalid JSON. Fix syntax and try again.";
-                return;
-            }
-
-            const res = await fetch("/api/flights", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            });
-
-            const result = await res.json();
-
-            if (res.ok) {
-                msg.style.color = "#34d399";
-                msg.textContent = "✅ " + (result.message || "Flight added");
-                if (typeof loadFlights === "function") loadFlights(); // refresh table if flights.js has it
-            } else {
-                msg.style.color = "#f87171";
-                msg.textContent = "❌ " + (result.error || "Failed to add flight");
+                msg.textContent = "❌ " + e.message;
             }
         }
+
+        // init
+        fuelLabel.textContent = fuelSlider.value + "%";
+        updatePreview();
     </script>
 
 </body>
