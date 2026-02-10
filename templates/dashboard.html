@@ -248,21 +248,65 @@
             </div>
         </div>
         
-        <div class="note">
+        
+        <!-- ===== Live Flight Status ===== -->
+<div class="stats">
+    <div class="stat-card">
+        <h3>✈️ On Time</h3>
+        <div class="value" id="onTime">—</div>
+    </div>
+    <div class="stat-card">
+        <h3>🟡 Boarding</h3>
+        <div class="value" id="boarding">—</div>
+    </div>
+    <div class="stat-card">
+        <h3>🔴 Delayed</h3>
+        <div class="value" id="delayed">—</div>
+    </div>
+    <div class="stat-card">
+        <h3>🟢 Departed</h3>
+        <div class="value" id="departed">—</div>
+    </div>
+</div>
+
+<!-- ===== Active Alerts ===== -->
+<div class="actions-grid" style="margin-top:24px;">
+    <div class="action-card">
+        <h3>🚨 Active Alerts</h3>
+        <ul id="alerts" style="list-style:none; padding-left:0; font-size:14px;"></ul>
+    </div>
+</div>
+<div class="note">
             This dashboard is your control tower. The manager page is your hangar.
         </div>
-
     </div>
     
     <script>
         async function simulate() {
-            const res = await fetch("/api/simulate", {
-                method: "POST"
-            });
-            const data = await res.json();
-            alert(data.message || "Simulation triggered");
-            document.getElementById("statSim").textContent = new Date().toLocaleTimeString();
-        }
+    await fetch("/api/simulate", { method: "POST" });
+
+    // Update last simulation time
+    document.getElementById("statSim").textContent =
+        new Date().toLocaleTimeString();
+
+    // Soft visual feedback
+    flashStatus();
+
+    // Refresh live data
+    loadStats();
+    loadFlightStatusAndAlerts();
+}
+function flashStatus() {
+    const el = document.getElementById("statStatus");
+    el.textContent = "Updating...";
+    el.style.opacity = "0.6";
+
+    setTimeout(() => {
+        el.textContent = "Online";
+        el.style.opacity = "1";
+    }, 800);
+}
+
 
         // Optional: fetch stats
         async function loadStats() {
@@ -276,6 +320,47 @@
         }
 
         loadStats();
+        async function loadFlightStatusAndAlerts() {
+    const res = await fetch("/api/flights");
+    const flights = await res.json();
+
+    const statusCount = {
+        "On Time": 0,
+        "Boarding": 0,
+        "Delayed": 0,
+        "Departed": 0
+    };
+
+    const alerts = document.getElementById("alerts");
+    alerts.innerHTML = "";
+
+    flights.forEach(f => {
+        if (statusCount[f.status] !== undefined) {
+            statusCount[f.status]++;
+        }
+
+        if (f.fuel < 30) {
+            alerts.innerHTML += `<li>⛽ Low Fuel: ${f.flight_no} (${f.fuel}%)</li>`;
+        }
+
+        if (f.status === "Delayed") {
+            alerts.innerHTML += `<li>⏱️ Delayed: ${f.flight_no}</li>`;
+        }
+    });
+
+    document.getElementById("onTime").textContent = statusCount["On Time"];
+    document.getElementById("boarding").textContent = statusCount["Boarding"];
+    document.getElementById("delayed").textContent = statusCount["Delayed"];
+    document.getElementById("departed").textContent = statusCount["Departed"];
+
+    if (!alerts.innerHTML) {
+        alerts.innerHTML = "<li>All systems operating normally</li>";
+    }
+}
+
+loadFlightStatusAndAlerts();
+setInterval(loadFlightStatusAndAlerts, 5000);
+
     </script>
 
 </body>
